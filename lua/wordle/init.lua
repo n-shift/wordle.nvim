@@ -1,6 +1,5 @@
--- TODO: check how many letters are input
--- color stuff by going through status
--- display input in float
+local utils = require("wordle.utils")
+
 local wordle_buf = vim.api.nvim_create_buf(false, false)
 local wordle_win
 
@@ -18,10 +17,12 @@ local timestamp = os.time(time)
 -- Set current date timestamp as random seed
 math.randomseed(timestamp)
 
+-- Set up dictionary and today's word
 local words = require("wordle.list")
 local index = math.random(#words)
 local word = words[index]
 
+-- Set up wordle metadata
 local wordle = {
     status = {},
     state = {},
@@ -39,23 +40,20 @@ for idx = 1,6 do
     }
 end
 
+
+--- Process gained input on <CR>
 function wordle.check()
     wordle.correct = 0
     if wordle.finished then
         if wordle.attempt > 6 then
-            print("x/6")
         else
-            print(wordle.attempt.."/6")
         end
         for idx=1,wordle.attempt do
             if idx > 6 then return end
-            print(table.concat(wordle.state[idx]))
-            print(vim.inspect(wordle.status[idx]))
         end
         return
     end
     if #wordle.state[wordle.attempt] ~= 5 then
-        print("Incomplete input!")
         return
     end
     local actual = vim.split(word, "")
@@ -67,51 +65,47 @@ function wordle.check()
         end
     end
     if not exists then
-        print("Entry does not exist!")
         return
     end
     for idx, letter in ipairs(wordle.state[wordle.attempt]) do
         if actual[idx] == letter then
             wordle.status[wordle.attempt][idx] = 2
-            print(wordle.attempt, idx, letter, 2)
             wordle.correct = wordle.correct + 1
         elseif string.find(word, letter) then
             wordle.status[wordle.attempt][idx] = 1
-            print(wordle.attempt, idx, letter, 1)
         else
             wordle.status[wordle.attempt][idx] = 0
-            print(wordle.attempt, idx, letter, 0)
         end
     end
-    print(wordle.correct)
     if wordle.correct == 5 then
-        print("GG!")
         wordle.finished = true
         return
     elseif wordle.attempt == 6 then
         wordle.finished = true
-        print("You lost!")
     end
     wordle.attempt = wordle.attempt + 1
 end
 
 local alphabet = vim.split("abcdefghijklmnopqrstuvwxyz", "")
 
+--- Handle input
+--- @param letter string char to save
 function wordle.input(letter)
     if wordle.finished then
         return
     end
     if #wordle.state[wordle.attempt] == 5 then
-        print("Input overflow!")
         return
     end
     table.insert(wordle.state[wordle.attempt], letter)
 end
 
+--- Remove char from input table
 function wordle.pop()
     table.remove(wordle.state[wordle.attempt])
 end
 
+--- Set up gui
 function wordle.play()
     for idx = 1,6 do
         wordle.state[idx] = {}
@@ -134,35 +128,11 @@ function wordle.play()
         border = "solid",
         style = "minimal",
     })
-    vim.api.nvim_buf_set_keymap(
-        wordle_buf,
-        "n",
-        "<CR>",
-        "<cmd>lua require'wordle'.check()<cr>",
-        { noremap = true, silent = true }
-    )
-    vim.api.nvim_buf_set_keymap(
-        wordle_buf,
-        "n",
-        "<bs>",
-        "<cmd>lua require'wordle'.pop()<cr>",
-        { noremap = true, silent = true }
-    )
-    vim.api.nvim_buf_set_keymap(
-        wordle_buf,
-        "n",
-        "<C-c>",
-        "<cmd>bd!<cr>",
-        { noremap = true }
-    )
+    utils.wmap("<CR>", "<cmd>lua require'wordle'.check()<cr>", wordle_buf)
+    utils.wmap("<bs>", "<cmd>lua require'wordle'.pop()<cr>", wordle_buf)
+    utils.wmap("<C-c>", "<cmd>bd!<cr>", wordle_buf)
     for _, char in ipairs(alphabet) do
-        vim.api.nvim_buf_set_keymap(
-            wordle_buf,
-            "n",
-            char,
-            "<cmd>lua require'wordle'.input(" .. '"' .. char .. '"' .. ")<CR>",
-            { noremap = true, silent = true }
-        )
+        utils.wmap(char, "<cmd>lua require'wordle'.input(" .. '"' .. char .. '"' .. ")<CR>", wordle_buf)
     end
 end
 
