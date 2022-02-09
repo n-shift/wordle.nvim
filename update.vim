@@ -12,9 +12,9 @@ buffer ./lua/wordle/list.lua
 
 echom "Formatting"
 normal Oreturn {
-let @i = "    "
+let @i = "    \""
 %global/^.....$/normal "iP
-%global/^\s\s\s\s.....$/normal A,
+%global/^\s\s\s\s".....$/normal A",
 normal Gi}
 -1
 
