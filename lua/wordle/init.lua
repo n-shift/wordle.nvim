@@ -29,8 +29,18 @@ local wordle = {
     attempt = 1,
     finished = false,
     correct = 0,
+    letters = {},
 }
-for idx = 1,6 do
+for idx = 1, 6 do
+    wordle.letters[idx] = {
+        "_",
+        "_",
+        "_",
+        "_",
+        "_",
+    }
+end
+for idx = 1, 6 do
     wordle.status[idx] = {
         0,
         0,
@@ -40,20 +50,48 @@ for idx = 1,6 do
     }
 end
 
+local function draw()
+    local ns = vim.api.nvim_create_namespace("wordle")
+    local lines = { "Wordle" }
+    vim.cmd("hi WordleGrey guibg=#3A3A3C")
+    vim.cmd("hi WordleYellow guibg=#B6A22F")
+    vim.cmd("hi WordleGreen guibg=#39944E")
+    for i = 1, 6, 1 do
+        table.insert(lines, table.concat(wordle.letters[i], " "))
+    end
+    vim.api.nvim_buf_set_lines(wordle_buf, 0, -1, true, {})
+    vim.api.nvim_buf_set_lines(wordle_buf, 0, -1, true, lines)
+    for i = 1, wordle.attempt - 1 do
+        for j = 0, 4, 1 do
+            if wordle.status[i][j + 1] == 0 then
+                vim.api.nvim_buf_add_highlight(wordle_buf, ns, "WordleGrey", i, j * 2, j * 2 + 1)
+            elseif wordle.status[i][j + 1] == 1 then
+                vim.api.nvim_buf_add_highlight(wordle_buf, ns, "WordleYellow", i, j * 2, j * 2 + 1)
+            elseif wordle.status[i][j + 1] == 2 then
+                vim.api.nvim_buf_add_highlight(wordle_buf, ns, "WordleGreen", i, j * 2, j * 2 + 1)
+            end
+        end
+    end
+end
 
 --- Process gained input on <CR>
 function wordle.check()
     wordle.correct = 0
     if wordle.finished then
-        if wordle.attempt > 6 then
-        else
-        end
-        for idx=1,wordle.attempt do
-            if idx > 6 then return end
-        end
         return
+    else
+        if wordle.attempt > 5 then
+            print("Used your attempts")
+            return
+        end
+        for idx = 1, wordle.attempt do
+            if idx > 6 then
+                return
+            end
+        end
     end
     if #wordle.state[wordle.attempt] ~= 5 then
+        print("not 5 letters")
         return
     end
     local actual = vim.split(word, "")
@@ -65,25 +103,34 @@ function wordle.check()
         end
     end
     if not exists then
+        print("Invalid word")
         return
     end
     for idx, letter in ipairs(wordle.state[wordle.attempt]) do
+        -- correct letter
         if actual[idx] == letter then
             wordle.status[wordle.attempt][idx] = 2
             wordle.correct = wordle.correct + 1
+            -- misplaced letter
         elseif string.find(word, letter) then
             wordle.status[wordle.attempt][idx] = 1
+            -- wrong letter
         else
             wordle.status[wordle.attempt][idx] = 0
         end
     end
     if wordle.correct == 5 then
         wordle.finished = true
-        return
+        for i = wordle.attempt + 1, 6 do
+            for j = 1, 6 do
+                wordle.letters[i][j] = ""
+            end
+        end
     elseif wordle.attempt == 6 then
         wordle.finished = true
     end
     wordle.attempt = wordle.attempt + 1
+    draw()
 end
 
 local alphabet = vim.split("abcdefghijklmnopqrstuvwxyz", "")
@@ -98,16 +145,20 @@ function wordle.input(letter)
         return
     end
     table.insert(wordle.state[wordle.attempt], letter)
+    wordle.letters[wordle.attempt][#wordle.state[wordle.attempt]] = letter
+    draw()
 end
 
 --- Remove char from input table
 function wordle.pop()
+    wordle.letters[wordle.attempt][#wordle.state[wordle.attempt]] = "_"
     table.remove(wordle.state[wordle.attempt])
+    draw()
 end
 
 --- Set up gui
 function wordle.play()
-    for idx = 1,6 do
+    for idx = 1, 6 do
         wordle.state[idx] = {}
     end
     vim.api.nvim_buf_set_lines(wordle_buf, 0, -1, true, {})
@@ -125,15 +176,17 @@ function wordle.play()
         height = win_height,
         col = math.floor((width - win_width) / 2) - 1,
         row = math.floor((height - win_height) / 2) - 1,
-        border = "solid",
+        border = "shadow",
         style = "minimal",
     })
     utils.wmap("<CR>", "<cmd>lua require'wordle'.check()<cr>", wordle_buf)
+    utils.wmap("<esc>", "<cmd>bd!<CR>", wordle_buf)
     utils.wmap("<bs>", "<cmd>lua require'wordle'.pop()<cr>", wordle_buf)
     utils.wmap("<C-c>", "<cmd>bd!<cr>", wordle_buf)
     for _, char in ipairs(alphabet) do
         utils.wmap(char, "<cmd>lua require'wordle'.input(" .. '"' .. char .. '"' .. ")<CR>", wordle_buf)
     end
+    draw()
 end
 
 return wordle
