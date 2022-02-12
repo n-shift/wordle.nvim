@@ -1,5 +1,6 @@
 local utils = require("wordle.utils")
 
+
 local wordle_buf = vim.api.nvim_create_buf(false, false)
 local wordle_win
 
@@ -11,16 +12,21 @@ time.hour = 0
 time.min = 0
 time.sec = 0
 
---- Current date UNIX timestamp
-local timestamp = os.time(time)
+--- The day Wordle has started
+local initial_day = os.time({year = 2021, month = 6, day = 19})
 
--- Set current date timestamp as random seed
-math.randomseed(timestamp)
+--- Current date UNIX timestamp
+local today = os.time(time)
+
+local duration = math.floor(utils.julian(today) - utils.julian(initial_day)) + 2
+
+print(duration)
 
 -- Set up dictionary and today's word
 local words = require("wordle.list")
-local index = math.random(#words)
-local word = words[index]
+local answers = words[1]
+local valid = words[2]
+local word = answers[duration]
 
 -- Set up wordle metadata
 local wordle = {
@@ -96,10 +102,18 @@ function wordle.check()
     end
     local actual = vim.split(word, "")
     local exists = false
-    for _, existing in pairs(words) do
+    for _, existing in pairs(valid) do
         if existing == table.concat(wordle.state[wordle.attempt]) then
             exists = true
             break
+        end
+    end
+    if not exists then
+        for _, existing in pairs(answers) do
+            if existing == table.concat(wordle.state[wordle.attempt]) then
+                exists = true
+                break
+            end
         end
     end
     if not exists then

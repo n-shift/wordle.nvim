@@ -5,4 +5,8 @@ function utils.wmap(lhs, rhs, buf)
     { noremap = true, silent = true })
 end
 
+function utils.julian(timestamp)
+    return timestamp / 86400 + 2440587.5
+end
+
 return utils
