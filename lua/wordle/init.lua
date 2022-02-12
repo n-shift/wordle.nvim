@@ -60,6 +60,7 @@ for idx = 1, 6 do
 end
 
 local function draw()
+    vim.api.nvim_buf_set_option(wordle_buf, "modifiable", true)
     local ns = vim.api.nvim_create_namespace("wordle")
     local lineblocks = ui.block.from_table_letters(wordle.letters)
     vim.cmd("hi WordleBgUnused guibg=#3A3A3C")
@@ -82,6 +83,7 @@ local function draw()
             end
         end
     end
+    vim.api.nvim_buf_set_option(wordle_buf, "modifiable", false)
 end
 
 --- Process gained input on <CR>
@@ -178,6 +180,7 @@ function wordle.play()
     vim.api.nvim_buf_set_option(wordle_buf, "bufhidden", "wipe")
     vim.api.nvim_buf_set_option(wordle_buf, "filetype", "wdn")
     vim.api.nvim_buf_set_option(wordle_buf, "readonly", true)
+    vim.api.nvim_buf_set_option(wordle_buf, "modifiable", false)
     local width = vim.api.nvim_win_get_width(0)
     local height = vim.api.nvim_win_get_height(0)
     local win_width = math.floor(width * 0.9)
