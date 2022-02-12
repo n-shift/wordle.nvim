@@ -42,11 +42,11 @@ local wordle = {
 }
 for idx = 1, 6 do
     wordle.letters[idx] = {
-        "_",
-        "_",
-        "_",
-        "_",
-        "_",
+        " ",
+        " ",
+        " ",
+        " ",
+        " ",
     }
 end
 for idx = 1, 6 do
@@ -62,9 +62,9 @@ end
 local function draw()
     local ns = vim.api.nvim_create_namespace("wordle")
     local lineblocks = ui.block.from_table_letters(wordle.letters)
-    vim.cmd("hi WordleGrey guibg=#3A3A3C")
-    vim.cmd("hi WordleYellow guibg=#B6A22F")
-    vim.cmd("hi WordleGreen guibg=#39944E")
+    vim.cmd("hi WordleBgUnused guibg=#3A3A3C")
+    vim.cmd("hi WordleBgMisplaced guibg=#B6A22F")
+    vim.cmd("hi WordleBgCorrect guibg=#39944E")
     vim.api.nvim_buf_set_lines(wordle_buf, 0, -1, true, buf_empty)
     local b_id = 1
     for idx=0,23,4 do
@@ -74,11 +74,11 @@ local function draw()
     for i = 1, wordle.attempt - 1 do
         for j = 0, 4, 1 do
             if wordle.status[i][j + 1] == 0 then
-                vim.api.nvim_buf_add_highlight(wordle_buf, ns, "WordleGrey", i, j * 2, j * 2 + 1)
+                vim.api.nvim_buf_add_highlight(wordle_buf, ns, "WordleBgUnused", i, j * 2, j * 2 + 1)
             elseif wordle.status[i][j + 1] == 1 then
-                vim.api.nvim_buf_add_highlight(wordle_buf, ns, "WordleYellow", i, j * 2, j * 2 + 1)
+                vim.api.nvim_buf_add_highlight(wordle_buf, ns, "WordleBgMisplaced", i, j * 2, j * 2 + 1)
             elseif wordle.status[i][j + 1] == 2 then
-                vim.api.nvim_buf_add_highlight(wordle_buf, ns, "WordleGreen", i, j * 2, j * 2 + 1)
+                vim.api.nvim_buf_add_highlight(wordle_buf, ns, "WordleBgCorrect", i, j * 2, j * 2 + 1)
             end
         end
     end
@@ -139,11 +139,6 @@ function wordle.check()
     end
     if wordle.correct == 5 then
         wordle.finished = true
-        for i = wordle.attempt + 1, 6 do
-            for j = 1, 6 do
-                wordle.letters[i][j] = ""
-            end
-        end
     elseif wordle.attempt == 6 then
         wordle.finished = true
     end
