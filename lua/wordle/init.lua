@@ -61,33 +61,19 @@ end
 
 local function draw()
     vim.api.nvim_buf_set_option(wordle_buf, "modifiable", true)
-    local ns = vim.api.nvim_create_namespace("wordle")
     local lineblocks = ui.block.from_table_letters(wordle.letters)
-    vim.cmd("hi WordleBgUnused guibg=#3A3A3C")
-    vim.cmd("hi WordleBgMisplaced guibg=#B6A22F")
-    vim.cmd("hi WordleBgCorrect guibg=#39944E")
     vim.api.nvim_buf_set_lines(wordle_buf, 0, -1, true, buf_empty)
     local b_id = 1
     for idx=0,23,4 do
         vim.api.nvim_buf_set_lines(wordle_buf, idx, idx+2, true, lineblocks[b_id])
         b_id = b_id + 1
     end
-    for i = 1, wordle.attempt - 1 do
-        for j = 0, 4, 1 do
-            if wordle.status[i][j + 1] == 0 then
-                vim.api.nvim_buf_add_highlight(wordle_buf, ns, "WordleBgUnused", i, j * 2, j * 2 + 1)
-            elseif wordle.status[i][j + 1] == 1 then
-                vim.api.nvim_buf_add_highlight(wordle_buf, ns, "WordleBgMisplaced", i, j * 2, j * 2 + 1)
-            elseif wordle.status[i][j + 1] == 2 then
-                vim.api.nvim_buf_add_highlight(wordle_buf, ns, "WordleBgCorrect", i, j * 2, j * 2 + 1)
-            end
-        end
-    end
     vim.api.nvim_buf_set_option(wordle_buf, "modifiable", false)
 end
 
 --- Process gained input on <CR>
 function wordle.check()
+    local ns = vim.api.nvim_create_namespace("wordle")
     wordle.correct = 0
     if wordle.finished then
         return
@@ -144,6 +130,11 @@ function wordle.check()
     elseif wordle.attempt == 6 then
         wordle.finished = true
     end
+    for idx=0,wordle.attempt*4-1,4 do
+        for id, status in ipairs(wordle.status[wordle.attempt]) do
+            ui.highlight.block(ns, wordle_buf, idx, id, status)
+        end
+    end
     wordle.attempt = wordle.attempt + 1
     draw()
 end
@@ -181,6 +172,7 @@ function wordle.play()
     vim.api.nvim_buf_set_option(wordle_buf, "filetype", "wdn")
     vim.api.nvim_buf_set_option(wordle_buf, "readonly", true)
     vim.api.nvim_buf_set_option(wordle_buf, "modifiable", false)
+    ui.highlight.register()
     local width = vim.api.nvim_win_get_width(0)
     local height = vim.api.nvim_win_get_height(0)
     local win_width = math.floor(width * 0.9)
