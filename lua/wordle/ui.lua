@@ -54,6 +54,54 @@ function block.from_table_letters(tbl)
     return lines
 end
 
+local highlight = {}
+
+function highlight.register()
+    vim.cmd("hi WordleBgUnused guibg=#3a3a3c")
+    vim.cmd("hi WordleBgMisplaced guibg=#b6a22f")
+    vim.cmd("hi WordleBgCorrect guibg=#39944e")
+    vim.cmd("hi WordleFgUnused guifg=#3a3a3c")
+    vim.cmd("hi WordleFgMisplaced guifg=#b6a22f")
+    vim.cmd("hi WordleFgCorrect guifg=#39944e")
+end
+
+function highlight.border(namespace, buffer, top_line, block, status)
+    local group
+    if status == 0 then
+        group = "WordleBgUnused"
+    elseif status == 1 then
+        group = "WordleBgMisplaced"
+    elseif status == 2 then
+        group = "WordleBgCorrect"
+    end
+    local end_dist = 7*block - 1
+    local start_dist = end_dist - 4
+    vim.api.nvim_buf_add_highlight(buffer, namespace, group, top_line, start_dist, end_dist)
+    vim.api.nvim_buf_add_highlight(buffer, namespace, group, top_line + 1, start_dist, start_dist)
+    vim.api.nvim_buf_add_highlight(buffer, namespace, group, top_line + 1, end_dist, end_dist)
+    vim.api.nvim_buf_add_highlight(buffer, namespace, group, top_line + 2, start_dist, end_dist)
+end
+
+function highlight.char(namespace, buffer, top_line, block, status)
+    local group
+    if status == 0 then
+        group = "WordleFgUnused"
+    elseif status == 1 then
+        group = "WordleFgMisplaced"
+    elseif status == 2 then
+        group = "WordleFgCorrect"
+    end
+    local dist = 7*block - 3
+    print(top_line + 1, dist)
+    vim.api.nvim_buf_add_highlight(buffer, namespace, group, top_line + 1, dist, dist+1)
+end
+
+function highlight.block(namespace, buffer, top_line, block, status)
+    highlight.border(namespace, buffer, top_line, block, status)
+    highlight.char(namespace, buffer, top_line, block, status)
+end
+
 ui.block = block
+ui.highlight = highlight
 
 return ui
