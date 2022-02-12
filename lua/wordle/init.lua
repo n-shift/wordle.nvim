@@ -1,7 +1,12 @@
 local utils = require("wordle.utils")
+local ui = require("wordle.ui")
 
 
 local wordle_buf = vim.api.nvim_create_buf(false, false)
+local buf_empty = {}
+for idx=1,24 do
+    buf_empty[idx] = " "
+end
 local wordle_win
 
 --- Current time table
@@ -19,8 +24,6 @@ local initial_day = os.time({year = 2021, month = 6, day = 19})
 local today = os.time(time)
 
 local duration = math.floor(utils.julian(today) - utils.julian(initial_day)) + 2
-
-print(duration)
 
 -- Set up dictionary and today's word
 local words = require("wordle.list")
@@ -58,15 +61,16 @@ end
 
 local function draw()
     local ns = vim.api.nvim_create_namespace("wordle")
-    local lines = { "Wordle" }
+    local lineblocks = ui.block.from_table_letters(wordle.letters)
     vim.cmd("hi WordleGrey guibg=#3A3A3C")
     vim.cmd("hi WordleYellow guibg=#B6A22F")
     vim.cmd("hi WordleGreen guibg=#39944E")
-    for i = 1, 6, 1 do
-        table.insert(lines, table.concat(wordle.letters[i], " "))
+    vim.api.nvim_buf_set_lines(wordle_buf, 0, -1, true, buf_empty)
+    local b_id = 1
+    for idx=0,23,4 do
+        vim.api.nvim_buf_set_lines(wordle_buf, idx, idx+2, true, lineblocks[b_id])
+        b_id = b_id + 1
     end
-    vim.api.nvim_buf_set_lines(wordle_buf, 0, -1, true, {})
-    vim.api.nvim_buf_set_lines(wordle_buf, 0, -1, true, lines)
     for i = 1, wordle.attempt - 1 do
         for j = 0, 4, 1 do
             if wordle.status[i][j + 1] == 0 then
