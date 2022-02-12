@@ -73,6 +73,8 @@ function highlight.border(namespace, buffer, top_line, block, status)
         group = "WordleBgMisplaced"
     elseif status == 2 then
         group = "WordleBgCorrect"
+    else
+        return
     end
     local end_dist = 7*block - 1
     local start_dist = end_dist - 4
@@ -90,9 +92,10 @@ function highlight.char(namespace, buffer, top_line, block, status)
         group = "WordleFgMisplaced"
     elseif status == 2 then
         group = "WordleFgCorrect"
+    else
+        return
     end
     local dist = 7*block - 3
-    print(top_line + 1, dist)
     vim.api.nvim_buf_add_highlight(buffer, namespace, group, top_line + 1, dist, dist+1)
 end
 
