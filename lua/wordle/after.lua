@@ -78,6 +78,8 @@ function after.finish_write(attempt, finished, state, day, answer)
     write(5+#attempts, margin_text("Answer:", width-7))
     write(6+#attempts, answer)
     write(8+#attempts, margin_text(shoutout, width-#shoutout))
+
+    vim.api.nvim_buf_set_option(finish_buf, "modifiable", false)
 end
 
 return after
