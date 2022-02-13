@@ -51,11 +51,6 @@ for idx = 1, 6 do
 end
 for idx = 1, 6 do
     wordle.status[idx] = {
-        10,
-        10,
-        10,
-        10,
-        10,
     }
 end
 
@@ -176,8 +171,8 @@ function wordle.play()
     ui.highlight.register()
     local width = vim.api.nvim_win_get_width(0)
     local height = vim.api.nvim_win_get_height(0)
-    local win_width = math.floor(width * 0.9)
-    local win_height = math.floor(height * 0.9)
+    local win_width = 35
+    local win_height = 23
 
     wordle_win = vim.api.nvim_open_win(wordle_buf, true, {
         relative = "win",
