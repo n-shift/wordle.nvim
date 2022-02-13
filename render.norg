@@ -1,0 +1,11 @@
+@document.meta
+    title: render
+    description: 
+    authors: shift
+    categories: 
+    created: 2022-02-13
+    version: 0.0.9
+@end
+
+* How does highlighting blocks work
+  On each <CR> (attempt - 1) loop through every possible attempts and show them
