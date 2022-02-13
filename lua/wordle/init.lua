@@ -69,11 +69,10 @@ local function draw()
         vim.api.nvim_buf_set_lines(wordle_buf, idx, idx+2, true, lineblocks[b_id])
         b_id = b_id + 1
     end
-    for att=1,wordle.attempt do
-        for idx=0,att*4-1,4 do
-            for id, status in ipairs(wordle.status[att]) do
-                ui.highlight.block(ns, wordle_buf, idx, id, status)
-            end
+
+    for att=1,wordle.attempt-1 do
+        for id, status in ipairs(wordle.status[att]) do
+            ui.highlight.block(ns, wordle_buf, att*4-4, id, status)
         end
     end
     vim.api.nvim_buf_set_option(wordle_buf, "modifiable", false)
