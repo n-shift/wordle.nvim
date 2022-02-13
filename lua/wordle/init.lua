@@ -70,6 +70,7 @@ local function draw()
             ui.highlight.block(ns, wordle_buf, att*4-4, id, status)
         end
     end
+    utils.cursor(wordle_win, wordle.attempt, #wordle.state[wordle.attempt])
     vim.api.nvim_buf_set_option(wordle_buf, "modifiable", false)
 end
 
