@@ -1,13 +1,24 @@
 local utils = require("wordle.utils")
 local ui = require("wordle.ui")
+local after = require("wordle.after")
 
-
+local parent_win = vim.api.nvim_get_current_win()
 local wordle_buf
 local buf_empty = {}
 for idx=1,24 do
     buf_empty[idx] = " "
 end
 local wordle_win
+
+local width = vim.api.nvim_win_get_width(0)
+local height = vim.api.nvim_win_get_height(0)
+local win_width = 35
+local win_height = 23
+
+local wordle_col = math.floor((width - win_width) / 2) - 1
+local wordle_row = math.floor((height - win_height) / 2) - 1
+local finish_col = wordle_col - 1 - win_width
+local finish_row = wordle_row
 
 --- Current time table
 local time = os.date("!*t")
@@ -81,6 +92,8 @@ function wordle.check()
         return
     else
         if wordle.attempt > 5 then
+            after.finish(parent_win, win_height, win_width, finish_col, finish_row)
+            after.finish_write(wordle.attempt, wordle.finished, wordle.status, duration, word)
             print("Used your attempts")
             return
         end
@@ -129,6 +142,8 @@ function wordle.check()
     end
     if wordle.correct == 5 then
         wordle.finished = true
+        after.finish(parent_win, win_height, win_width, finish_col, finish_row)
+        after.finish_write(wordle.attempt, wordle.finished, wordle.status, duration, word)
     elseif wordle.attempt == 6 then
         wordle.finished = true
     end
@@ -171,21 +186,18 @@ function wordle.play()
     vim.api.nvim_buf_set_option(wordle_buf, "readonly", true)
     vim.api.nvim_buf_set_option(wordle_buf, "modifiable", false)
     ui.highlight.register()
-    local width = vim.api.nvim_win_get_width(0)
-    local height = vim.api.nvim_win_get_height(0)
-    local win_width = 35
-    local win_height = 23
 
     wordle_win = vim.api.nvim_open_win(wordle_buf, true, {
         relative = "win",
-        win = 0,
+        win = parent_win,
         width = win_width,
         height = win_height,
-        col = math.floor((width - win_width) / 2) - 1,
-        row = math.floor((height - win_height) / 2) - 1,
+        col = wordle_col,
+        row = wordle_row,
         border = "shadow",
         style = "minimal",
     })
+    vim.api.nvim_win_set_option(wordle_win, "scrolloff", 0)
     utils.wmap("<CR>", "<cmd>lua require'wordle'.check()<cr>", wordle_buf)
     utils.wmap("<esc>", "<cmd>bd!<CR>", wordle_buf)
     utils.wmap("<bs>", "<cmd>lua require'wordle'.pop()<cr>", wordle_buf)
