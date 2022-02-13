@@ -2,7 +2,7 @@ local utils = require("wordle.utils")
 local ui = require("wordle.ui")
 
 
-local wordle_buf = vim.api.nvim_create_buf(false, false)
+local wordle_buf
 local buf_empty = {}
 for idx=1,24 do
     buf_empty[idx] = " "
@@ -161,6 +161,7 @@ end
 
 --- Set up gui
 function wordle.play()
+    wordle_buf = vim.api.nvim_create_buf(false, false)
     for idx = 1, 6 do
         wordle.state[idx] = {}
     end
