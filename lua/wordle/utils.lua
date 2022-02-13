@@ -10,8 +10,11 @@ function utils.julian(timestamp)
 end
 
 function utils.cursor(wordle_win, attempt, letter)
-    if letter == 0 then letter = 1 end
-    print(wordle_win, attempt, letter)
+    letter = letter + 1
+    if letter == 6 then
+        letter = 1
+        attempt = attempt + 1
+    end
     local row = attempt*4-2
     -- TODO: use byte-index
     local col = 11*letter-6
