@@ -20,8 +20,8 @@ end
 function block.chain(blocks)
     local chained = {}
     for _, _block in ipairs(blocks) do
-        for idx = 1,3 do
-            chained[idx] = (chained[idx] or "").." ".._block[idx].." "
+        for idx = 1, 3 do
+            chained[idx] = (chained[idx] or "") .. " " .. _block[idx] .. " "
         end
     end
     return chained
@@ -42,7 +42,7 @@ function block.from_letters(letters)
     for idx, letter in ipairs(letters) do
         blocks[idx] = block.new(letter)
     end
-    blocks= block.chain(blocks)
+    blocks = block.chain(blocks)
     return blocks
 end
 
@@ -55,7 +55,7 @@ function block.from_table_letters(tbl)
 end
 
 local function position(buffer, line, index)
-    local str = vim.api.nvim_buf_get_lines(buffer, line, line+1, true)[1]
+    local str = vim.api.nvim_buf_get_lines(buffer, line, line + 1, true)[1]
     return vim.fn.byteidx(str, index)
 end
 
@@ -78,7 +78,7 @@ function highlight.border(namespace, buffer, top_line, block, status)
     else
         return
     end
-    local end_dist = 7*block - 1
+    local end_dist = 7 * block - 1
     local start_dist = end_dist - 5
 
     local dist_top_l = position(buffer, top_line, start_dist)
@@ -106,9 +106,9 @@ function highlight.char(namespace, buffer, top_line, block, status)
     else
         return
     end
-    local dist = 7*block - 4
+    local dist = 7 * block - 4
     dist = position(buffer, top_line + 1, dist)
-    vim.api.nvim_buf_add_highlight(buffer, namespace, group, top_line + 1, dist, dist+1)
+    vim.api.nvim_buf_add_highlight(buffer, namespace, group, top_line + 1, dist, dist + 1)
 end
 
 function highlight.block(namespace, buffer, top_line, block, status)

@@ -1,8 +1,7 @@
 local utils = {}
 
 function utils.wmap(lhs, rhs, buf)
-    vim.api.nvim_buf_set_keymap(buf, "n", lhs, rhs,
-    { noremap = true, silent = true })
+    vim.api.nvim_buf_set_keymap(buf, "n", lhs, rhs, { noremap = true, silent = true })
 end
 
 function utils.julian(timestamp)
@@ -15,10 +14,10 @@ function utils.cursor(wordle_win, attempt, letter)
         letter = 1
         attempt = attempt + 1
     end
-    local row = attempt*4-2
+    local row = attempt * 4 - 2
     -- TODO: use byte-index
-    local col = 11*letter-6
-    vim.api.nvim_win_set_cursor(wordle_win, {row, col})
+    local col = 11 * letter - 6
+    vim.api.nvim_win_set_cursor(wordle_win, { row, col })
 end
 
 return utils

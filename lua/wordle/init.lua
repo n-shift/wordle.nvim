@@ -5,7 +5,7 @@ local after = require("wordle.after")
 local parent_win = vim.api.nvim_get_current_win()
 local wordle_buf
 local buf_empty = {}
-for idx=1,24 do
+for idx = 1, 24 do
     buf_empty[idx] = " "
 end
 local wordle_win
@@ -29,7 +29,7 @@ time.min = 0
 time.sec = 0
 
 --- The day Wordle has started
-local initial_day = os.time({year = 2021, month = 6, day = 19})
+local initial_day = os.time({ year = 2021, month = 6, day = 19 })
 
 --- Current date UNIX timestamp
 local today = os.time(time)
@@ -61,8 +61,7 @@ for idx = 1, 6 do
     }
 end
 for idx = 1, 6 do
-    wordle.status[idx] = {
-    }
+    wordle.status[idx] = {}
 end
 
 local function draw()
@@ -71,14 +70,14 @@ local function draw()
     local lineblocks = ui.block.from_table_letters(wordle.letters)
     vim.api.nvim_buf_set_lines(wordle_buf, 0, -1, true, buf_empty)
     local b_id = 1
-    for idx=0,23,4 do
-        vim.api.nvim_buf_set_lines(wordle_buf, idx, idx+2, true, lineblocks[b_id])
+    for idx = 0, 23, 4 do
+        vim.api.nvim_buf_set_lines(wordle_buf, idx, idx + 2, true, lineblocks[b_id])
         b_id = b_id + 1
     end
 
-    for att=1,wordle.attempt-1 do
+    for att = 1, wordle.attempt - 1 do
         for id, status in ipairs(wordle.status[att]) do
-            ui.highlight.block(ns, wordle_buf, att*4-4, id, status)
+            ui.highlight.block(ns, wordle_buf, att * 4 - 4, id, status)
         end
     end
     utils.cursor(wordle_win, wordle.attempt, #wordle.state[wordle.attempt])
@@ -203,7 +202,11 @@ function wordle.play()
     utils.wmap("<bs>", "<cmd>lua require'wordle'.pop()<cr>", wordle_buf)
     utils.wmap("<C-c>", "<cmd>bd!<cr>", wordle_buf)
     for _, char in ipairs(alphabet) do
-        utils.wmap(char, "<cmd>lua require'wordle'.input(" .. '"' .. char .. '"' .. ")<CR>", wordle_buf)
+        utils.wmap(
+            char,
+            "<cmd>lua require'wordle'.input(" .. '"' .. char .. '"' .. ")<CR>",
+            wordle_buf
+        )
     end
     draw()
 end
